@@ -4,11 +4,12 @@ import time
 from itertools import chain
 import pandas as pd
 import numpy as np
+import plotly.express as px
 from py2AdobeReporting.http_client import HttpClient, DEFAULT_RETRY_COUNT
 from py2AdobeReporting import utils as ut
 from py2AdobeReporting.reporting_api import ReportingAPI
 
-class Reporting(ReportingAPI):
+class Reporting():
     """Class for all CJA Reporting Management functions"""
 
     def rows_per_page_setting(self, data_input):
@@ -26,6 +27,7 @@ class Reporting(ReportingAPI):
         ## For inputs on rowsPerPage for dimension and breakdowns
         if data_input > 400:
             data_input = 400
+            return data_input
         else:
             data_input1 = data_input
             return data_input1
@@ -40,7 +42,10 @@ class Reporting(ReportingAPI):
                          req_num=DEFAULT_RETRY_COUNT, 
                          payload_type="json", 
                          body=body).post()
-        res = json.loads(res.text)
+        try:
+            res = json.loads(res.text)
+        except json.JSONDecodeError as exc:
+            raise ReportingAPI.JsonConversionFailure() from exc
         return res
 
     def get_total_table_rows(self, headers, body):
@@ -52,26 +57,29 @@ class Reporting(ReportingAPI):
                          req_num=DEFAULT_RETRY_COUNT, 
                          payload_type="json", 
                          body=body).post()
-        res = json.loads(res.text)
+        try:
+            res = json.loads(res.text)
+        except json.JSONDecodeError as exc:
+            raise ReportingAPI.JsonConversionFailure() from exc
         res = res['totalElements']
         return res
 
     def get_total_table_pages(self, headers, body):
         """Package function for getting the Total Table Pages"""
-        total_rows = self.get_total_table_rows(headers, body)
+        total_rows = Reporting.get_total_table_rows(self, headers, body)
         total_pages = int(np.ceil(total_rows/50000))
         return total_pages
 
     def get_all_rows_report(self, headers, body, rows_per_page):
         """Package function built to get all the rows present 
         on a table for a single call(one dimension, multiple metrics)"""
-        row_num = self.get_total_table_rows(headers, body)
+        row_num = Reporting.get_total_table_rows(self, headers, body)
         time.sleep(2)
         ## Set to max Rows per pull
-        rows_per_page = self.rows_per_page_setting(rows_per_page)
+        rows_per_page = Reporting.rows_per_page_setting(self, rows_per_page)
         num_of_calls = int(np.ceil(row_num/rows_per_page))
         url = ReportingAPI.base_url()
-        num_pages = self.get_total_table_pages(headers, body)
+        num_pages = Reporting.get_total_table_pages(self, headers, body)
         body['settings']['limit']=rows_per_page
         output = []
         i = 0
@@ -87,7 +95,10 @@ class Reporting(ReportingAPI):
                                  req_num=DEFAULT_RETRY_COUNT, 
                                  payload_type="json", 
                                  body=body).post()
-                res = json.loads(res.text)
+                try:
+                    res = json.loads(res.text)
+                except json.JSONDecodeError as exc:
+                    raise ReportingAPI.JsonConversionFailure() from exc
                 new_data = res['rows']
                 output.append(new_data)
                 i+=1
@@ -97,7 +108,7 @@ class Reporting(ReportingAPI):
     def monthly_time_series_report(self, headers, data_view_id, start_date, end_date, metric, limit=50000):
         """Package functiuon for month level time series reports"""
         url = ReportingAPI.base_url()
-        limit = self.rows_per_page_setting(limit)
+        limit = Reporting.rows_per_page_setting(self, limit)
         body = {"globalFilters": [
             {
                 "type": "dateRange",
@@ -134,7 +145,10 @@ class Reporting(ReportingAPI):
                          req_num=DEFAULT_RETRY_COUNT, 
                          payload_type="json", 
                          body=body).post()
-        res = json.loads(res.text)
+        try:
+            res = json.loads(res.text)
+        except json.JSONDecodeError as exc:
+            raise ReportingAPI.JsonConversionFailure() from exc
         column_names = ["Month","Metric"]
         df_dict = ut.dict_creation(column_names)
         i = 0
@@ -150,13 +164,24 @@ class Reporting(ReportingAPI):
         df['Month'] = pd.to_datetime(df['Month'])
         # Sort by the date column
         df.sort_values(by='Month', inplace=True)
+        try:
+            fig = px.line(
+                df,
+                x = "Month",
+                y = "Metric",
+                title = "Monthly Time Series Report"
+            )
+            fig.show()
+            fig.write_html("monthly_time_series.html", auto_open=True)
+        except Exception as e:
+            print("Plotly visualization failed: ", e)
         return df
 
     def daily_time_series_report(self, headers, data_view_id, start_date, end_date, metric, 
                               limit=50000):
         """Package functions for time series daily level reports"""
         url = ReportingAPI.base_url()
-        limit = self.rows_per_page_setting(limit)
+        limit = Reporting.rows_per_page_setting(self, limit)
         body = {"globalFilters": [
             {
                 "type": "dateRange",
@@ -193,14 +218,17 @@ class Reporting(ReportingAPI):
                          req_num=DEFAULT_RETRY_COUNT, 
                          payload_type="json", 
                          body=body).post()
-        res = json.loads(res.text)
+        try:
+            res = json.loads(res.text)
+        except json.JSONDecodeError as exc:
+            raise ReportingAPI.JsonConversionFailure() from exc
         column_names = ["Day","Metric"]
         df_dict = ut.dict_creation(column_names)
         i = 0
         while i < len(res['rows']):
-            month = res['rows'][i]['value']
+            day = res['rows'][i]['value']
             value = res['rows'][i]['data']
-            var_list = [month, value]
+            var_list = [day, value]
             df_dict = ut.append_function_loop(df_dict, var_list, column_names)
             i+=1
         df = pd.DataFrame.from_dict(df_dict)
@@ -209,12 +237,23 @@ class Reporting(ReportingAPI):
         df['Day'] = pd.to_datetime(df['Day'])
         # Sort by the date column
         df.sort_values(by='Day', inplace=True)
+        try:
+            fig = px.line(
+                df,
+                x = "Day",
+                y = "Metric",
+                title = "Daily Time Series Report"
+            )
+            fig.show()
+            fig.write_html("daily_time_series.html", auto_open=True)
+        except Exception as e:
+            print("Plotly visualization failed: ", e)
         return df
 
     def five_metrics_report(self, headers, data_view_id, start_date, end_date,
                         metrics, dimension, rows_per_page):
         """Package function for pulling a table with five metrics"""
-        rows_per_page = self.rows_per_page_setting(rows_per_page)
+        rows_per_page = Reporting.rows_per_page_setting(self, rows_per_page)
         body = {"globalFilters": [
             {
                 "type": "dateRange",
@@ -266,22 +305,26 @@ class Reporting(ReportingAPI):
                 },
                 "dataId": data_view_id
             }
-        res = self.get_all_rows_report(headers, body, rows_per_page)
+        res = Reporting.get_all_rows_report(self, headers, body, rows_per_page)
+        print("Cleaning data into DataFrame....")
+        time.sleep(1)
         column_names = [dimension,metrics[0],metrics[1],metrics[2],metrics[3],metrics[4]]
-        df_dict = ut.dict_creation(column_names)
+        df_dict = {
+            key: [] for key in column_names
+        }
         i = 0
         while i < len(res):
+            met_values = []
             dim = res[i]['value']
-            l = 0
-            while l < len(res[i]['data']):
-                met1 = res[i]['data'][l]
-                met2 = res[i]['data'][l]
-                met3 = res[i]['data'][l]
-                met4 = res[i]['data'][l]
-                met5 = res[i]['data'][l]
-                l+=1
-            var_list = [dim, met1, met2, met3, met4, met5]
-            df_dict = ut.append_function_loop(df_dict, var_list, column_names)
+            for metric in res[i]['data']:
+                met_values.append(metric)
+            df_dict[column_names[0]].append(dim)
+            df_dict[column_names[1]].append(met_values[0])
+            df_dict[column_names[2]].append(met_values[1])
+            df_dict[column_names[3]].append(met_values[2])
+            df_dict[column_names[4]].append(met_values[3])
+            df_dict[column_names[5]].append(met_values[4])
+            met_values = []
             i+=1
         df = pd.DataFrame.from_dict(df_dict)
         return df
@@ -291,8 +334,8 @@ class Reporting(ReportingAPI):
         """Package function that is used to create a report with 
         one metric and one dimension broken down by another"""
         url = ReportingAPI.base_url()
-        dim_rows_per_page = self.dim_rows_per_page_setting(dim_rows_per_page)
-        breakdown_rows_per_page = self.dim_rows_per_page_setting(breakdown_rows_per_page)
+        dim_rows_per_page = Reporting.dim_rows_per_page_setting(self, dim_rows_per_page)
+        breakdown_rows_per_page = Reporting.dim_rows_per_page_setting(self, breakdown_rows_per_page)
         body = {"globalFilters": [
             {
                 "type": "dateRange",
@@ -330,7 +373,10 @@ class Reporting(ReportingAPI):
                          req_num=DEFAULT_RETRY_COUNT, 
                          payload_type="json", 
                          body=body).post()
-        res = json.loads(res.text)
+        try:
+            res = json.loads(res.text)
+        except json.JSONDecodeError as exc:
+            raise ReportingAPI.JsonConversionFailure() from exc
         num_of_calls = len(res['rows'])
         print("Total Rows to be broken down by " + breakdown_dim + ": " + str(num_of_calls))
         print("Rows per breakdown: " + str(breakdown_rows_per_page))
@@ -389,7 +435,10 @@ class Reporting(ReportingAPI):
                                        req_num=DEFAULT_RETRY_COUNT, 
                                        payload_type="json", 
                                        body=breakdown_body).post()
-            breakdown_rows = json.loads(breakdown_rows.text)
+            try:
+                res = json.loads(res.text)
+            except json.JSONDecodeError as exc:
+                raise ReportingAPI.JsonConversionFailure() from exc
             print("Breakdown complete for row: " + str(i))
             l = 0
             while l < len(breakdown_rows['rows']):
@@ -423,16 +472,22 @@ class Reporting(ReportingAPI):
         """API Call function for getting the top ten dimension items for a time period"""
         limit = 10
         date_range = f"{start_date}T00:00:00.000/{end_date}T00:00:00.000"
-        base_url = ReportingAPI.build_get_top_items_url(self)
+        base_url = ReportingAPI.build_get_top_items_url()
         try:
             if "contains" in search_type:
                 url = f"{base_url}?dataId={data_view_id}&dimension={dimension}&dateRange={date_range}&search-clause={contains_term}&limit={limit}"
                 res = HttpClient(url,headers).get()
-                res = json.loads(res.text)
+                try:
+                    res = json.loads(res.text)
+                except json.JSONDecodeError as exc:
+                    raise ReportingAPI.JsonConversionFailure() from exc
         except TypeError:
             url = f"{base_url}?dataId={data_view_id}&dimension={dimension}&dateRange={date_range}&limit={limit}"
             res = HttpClient(url,headers).get()
-            res = json.loads(res.text)
+            try:
+                res = json.loads(res.text)
+            except json.JSONDecodeError as exc:
+                raise ReportingAPI.JsonConversionFailure() from exc
         return res
 
     def get_top_ten_dimension_items_clean(self, res, start_date, end_date, dimension):
@@ -459,7 +514,7 @@ class Reporting(ReportingAPI):
     def get_top_ten_dimension_items(self, headers, data_view_id, start_date, end_date, dimension,
                                 search_type=str, contains_term=str):
         """Package function for getting the top ten dimension items for a time period"""
-        res = self.get_top_ten_dimension_items_call(headers, data_view_id, start_date, end_date, dimension,
+        res = Reporting.get_top_ten_dimension_items_call(self, headers, data_view_id, start_date, end_date, dimension,
                                 search_type, contains_term)
-        df = self.get_top_ten_dimension_items_clean(res, start_date, end_date, dimension)
+        df = Reporting.get_top_ten_dimension_items_clean(self, res, start_date, end_date, dimension)
         return df

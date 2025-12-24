@@ -1,27 +1,32 @@
 """Repporting API endpoints, base urls, and error handling"""
 
-from py2AdobeReporting.cja_functions.reporting_management import Reporting
+# from py2AdobeReporting.cja_functions.reporting_management import Reporting
 
-class ReportingAPI(Reporting):
+class ReportingAPI:
     """Class for all Reporting API related functionality"""
-    @staticmethod
-    def base_url():
+    BASE_URL = "https://cja.adobe.io/reports"
+    TOP_ITEMS_ENDPOINT = "/topItems"
+
+    @classmethod
+    def base_url(cls):
         """The base url for the reporting API"""
-        return "https://cja.adobe.io/reports"
+        return cls.BASE_URL
     
-    @staticmethod
-    def get_top_items_endpoint():
+    @classmethod
+    def get_top_items_endpoint(cls):
         """The endpoint for top items"""
-        return "/topItems"
-    
-    def build_url(self, endpoint):
+        return cls.TOP_ITEMS_ENDPOINT
+
+    @classmethod    
+    def build_url(cls, endpoint):
         """Builds the full URL for a given endpoint"""
-        return f"{self.base_url()}{endpoint}"
+        return f"{cls.BASE_URL}{endpoint}"
 
-    def build_get_top_items_url(self):
+    @classmethod
+    def build_get_top_items_url(cls):
         """Builds the full URL for the top items endpoint"""
-        return self.build_url(self.get_top_items_endpoint())
-
+        return f"{cls.BASE_URL}{cls.TOP_ITEMS_ENDPOINT}"
+    
     class SuccessfullResponseCodes:
         """Class for handling successful response codes"""
         default_message = "Successful Response"
@@ -30,6 +35,10 @@ class ReportingAPI(Reporting):
 
         def __str__(self):
             return self.message
+        
+    class JsonConversionFailure(Exception):
+        """When a call is succesful but json conversion fails for parsing"""
+        default_message = "API Call returned succesfully, but JSON conversion failed."
 
     class SuccessfulOK(SuccessfullResponseCodes):
         """200 status code response"""

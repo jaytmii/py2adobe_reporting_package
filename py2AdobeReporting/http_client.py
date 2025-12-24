@@ -46,7 +46,6 @@ class HttpClient(ReportingAPI):
         elif self.payload_type == "data" and self.body is not None:
             req_payload["data"] = self.body
         try:
-            print(req_payload)
             return requests.request(type_of_call, **req_payload)
         except requests.exceptions.HTTPError as error:
             print("Wrongly specified Call Type: ", error)
