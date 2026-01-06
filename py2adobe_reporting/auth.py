@@ -42,13 +42,12 @@ def json_load(your_config_file):
 
 def get_config_values(config_json):
     """Function to extract and return values from the config file."""
-    headers = config_json.get('defaultHeaders')
+    headers = config_json.get('default_headers')
     return headers, {
-            "apiKey": headers.get('x-api-key') if headers else None,
-            "orgId": headers.get('x-gw-ims-org-id') if headers else None,
-            "companyId": config_json.get('companyId'),
-            "clientSecret": config_json.get('clientSecret'),
-            # "apiName": config_json.get('name'),
+            "api_key": headers.get('x-api-key') if headers else None,
+            "org_id": headers.get('x-gw-ims-org-id') if headers else None,
+            "company_id": config_json.get('company_id'),
+            "client_secret": config_json.get('client_secret'),
             "scopes": config_json.get('scopes')
             }
 
@@ -60,8 +59,8 @@ def cja_oauth_headers(your_config_file, access_token):
     cja_headers = {
     "Content-Type" : "application/json",
     "Accept" : "application/json",
-    "x-gw-ims-org-id": config_values['orgId'],
-    "x-api-key" : config_values['apiKey'],
+    "x-gw-ims-org-id": config_values['org_id'],
+    "x-api-key" : config_values['api_key'],
     "Authorization" : "Bearer " + access_token}
     return cja_headers
 
@@ -72,9 +71,9 @@ def aep_oauth_headers(your_config_file, access_token, accept_header, sandbox):
     aep_headers = {
     "Content-Type" : "application/json",
     "Accept" : accept_header,
-    "x-gw-ims-org-id": config_values['orgId'],
+    "x-gw-ims-org-id": config_values['org_id'],
     "x-sandbox-name": sandbox,
-    "x-api-key" : config_values['apiKey'],
+    "x-api-key" : config_values['api_key'],
     "Authorization" : "Bearer " + access_token}
     return aep_headers
 
