@@ -96,7 +96,7 @@ def s2s_auth(
 
     token_url_full = TokenURL(config_json.get("ims_host"), config_json.get("token_url")).get_token_url()
     payload = {
-        'client_id': config_values['default_headers']['x-api-key'],
+        'client_id': config_values['api_key'],
         'client_secret': config_values['client_secret'],
         'grant_type': 'client_credentials',
         'scope': config_values['scopes']
@@ -106,8 +106,8 @@ def s2s_auth(
     if response.status_code == 200:
         token = response.json()
         print(token['access_token'])
-        return AEPEnv(config_values['default_headers']['x-api-key'],
-                      config_values['default_headers']['x-gw-ims-org-id'],
+        return AEPEnv(config_values['api_key'],
+                      config_values['org_id'],
                       config_values['company_id'],
                       token['access_token'])
     else:
