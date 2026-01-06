@@ -442,7 +442,7 @@ class Reporting(ReportingAPI):
                                        payload_type="json",
                                        body=breakdown_body).post()
             try:
-                res = json.loads(breakdown_rows.text)
+                breakdown_rows = json.loads(breakdown_rows.text)
             except json.JSONDecodeError as exc:
                 raise ReportingAPI.JsonConversionFailure() from exc
             print("Breakdown complete for row: " + str(i))
