@@ -8,9 +8,9 @@ import requests
 # {
 #     "client_secret": "clientSecretVal",
 #     "company_id": "companyIdVal",
-#     "ims_host": "ims-na1.adobelogin.com",
-#     "token_url": "/ims/token/v3",
-#     "defaultHeaders": {
+#     "ims_host": "ims_host_val",
+#     "token_url": "token_url_val",
+#     "default_headers": {
 #         "Accept": "application/json",
 #         "x-api-key": "apiKey",
 #         "x-gw-ims-org-id": "orgIdVal"
@@ -107,6 +107,9 @@ def s2s_auth(
     if response.status_code == 200:
         token = response.json()
         print(token['access_token'])
-        return AEPEnv(config_values['api_key'], config_values['org_id'], config_values['company_id'], token['access_token'])
+        return AEPEnv(config_values['default_headers']['x-api-key'],
+                      config_values['default_headers']['x-gw-ims-org-id'],
+                      config_values['company_id'],
+                      token['access_token'])
     else:
         raise requests.exceptions.RequestException(f"Failed to authenticate. Status code: {response.status_code}, Response: {response.text}")
