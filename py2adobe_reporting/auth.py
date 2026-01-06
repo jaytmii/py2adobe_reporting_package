@@ -97,7 +97,7 @@ def s2s_auth(
 
     token_url_full = TokenURL(config_json.get("ims_host"), config_json.get("token_url")).get_token_url()
     payload = {
-        'client_id': config_values['api_key'],
+        'client_id': config_values['default_headers']['x-api-key'],
         'client_secret': config_values['client_secret'],
         'grant_type': 'client_credentials',
         'scope': config_values['scopes']
