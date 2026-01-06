@@ -9,7 +9,7 @@ from py2adobe_reporting.http_client import HttpClient, DEFAULT_RETRY_COUNT
 from py2adobe_reporting import utils as ut
 from py2adobe_reporting.reporting_api import ReportingAPI
 
-class Reporting():
+class Reporting(ReportingAPI):
     """Class for all CJA Reporting Management functions"""
 
     def rows_per_page_setting(self, data_input):
@@ -442,7 +442,7 @@ class Reporting():
                                        payload_type="json",
                                        body=breakdown_body).post()
             try:
-                res = json.loads(res.text)
+                res = json.loads(breakdown_rows.text)
             except json.JSONDecodeError as exc:
                 raise ReportingAPI.JsonConversionFailure() from exc
             print("Breakdown complete for row: " + str(i))
