@@ -4,8 +4,8 @@ import pytest
 import numpy as np
 import pandas as pd
 import json
-from py2AdobeReporting.cja_functions.reporting_management import Reporting
-from py2AdobeReporting import utils as ut
+from py2adobe_reporting.cja_functions.reporting_management import Reporting
+from py2adobe_reporting import utils as ut
 
 
 

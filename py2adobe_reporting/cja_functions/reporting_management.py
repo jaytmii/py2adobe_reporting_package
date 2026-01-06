@@ -5,9 +5,9 @@ from itertools import chain
 import pandas as pd
 import numpy as np
 import plotly.express as px
-from py2AdobeReporting.http_client import HttpClient, DEFAULT_RETRY_COUNT
-from py2AdobeReporting import utils as ut
-from py2AdobeReporting.reporting_api import ReportingAPI
+from py2adobe_reporting.http_client import HttpClient, DEFAULT_RETRY_COUNT
+from py2adobe_reporting import utils as ut
+from py2adobe_reporting.reporting_api import ReportingAPI
 
 class Reporting():
     """Class for all CJA Reporting Management functions"""
@@ -37,10 +37,10 @@ class Reporting():
     def get_single_call_report(self, headers, body):
         """Package function for inputing your body for a report completed in one call"""
         url = ReportingAPI.base_url()
-        res = HttpClient(url, 
-                         headers, 
-                         req_num=DEFAULT_RETRY_COUNT, 
-                         payload_type="json", 
+        res = HttpClient(url,
+                         headers,
+                         req_num=DEFAULT_RETRY_COUNT,
+                         payload_type="json",
                          body=body).post()
         try:
             res = json.loads(res.text)
@@ -52,10 +52,10 @@ class Reporting():
         """Pacakge function for getting the total rows available in a table"""
         url = ReportingAPI.base_url()
         body['settings']['limit']=1
-        res = HttpClient(url, 
-                         headers, 
-                         req_num=DEFAULT_RETRY_COUNT, 
-                         payload_type="json", 
+        res = HttpClient(url,
+                         headers,
+                         req_num=DEFAULT_RETRY_COUNT,
+                         payload_type="json",
                          body=body).post()
         try:
             res = json.loads(res.text)
@@ -90,10 +90,10 @@ class Reporting():
                 body['settings']['page']=i
                 time.sleep(2)
                 print("Pulling Page: " + str(i))
-                res = HttpClient(url, 
-                                 headers, 
-                                 req_num=DEFAULT_RETRY_COUNT, 
-                                 payload_type="json", 
+                res = HttpClient(url,
+                                 headers,
+                                 req_num=DEFAULT_RETRY_COUNT,
+                                 payload_type="json",
                                  body=body).post()
                 try:
                     res = json.loads(res.text)
@@ -105,7 +105,13 @@ class Reporting():
         output = list(chain.from_iterable(output))
         return output
 
-    def monthly_time_series_report(self, headers, data_view_id, start_date, end_date, metric, limit=50000):
+    def monthly_time_series_report(self,
+                                   headers,
+                                   data_view_id,
+                                   start_date,
+                                   end_date,
+                                   metric,
+                                   limit=50000):
         """Package functiuon for month level time series reports"""
         url = ReportingAPI.base_url()
         limit = Reporting.rows_per_page_setting(self, limit)
@@ -140,10 +146,10 @@ class Reporting():
                 },
                 "dataId": data_view_id
             }
-        res = HttpClient(url, 
-                         headers, 
-                         req_num=DEFAULT_RETRY_COUNT, 
-                         payload_type="json", 
+        res = HttpClient(url,
+                         headers,
+                         req_num=DEFAULT_RETRY_COUNT,
+                         payload_type="json",
                          body=body).post()
         try:
             res = json.loads(res.text)
@@ -177,7 +183,7 @@ class Reporting():
             print("Plotly visualization failed: ", e)
         return df
 
-    def daily_time_series_report(self, headers, data_view_id, start_date, end_date, metric, 
+    def daily_time_series_report(self, headers, data_view_id, start_date, end_date, metric,
                               limit=50000):
         """Package functions for time series daily level reports"""
         url = ReportingAPI.base_url()
@@ -213,10 +219,10 @@ class Reporting():
                 },
                 "dataId": data_view_id
             }
-        res = HttpClient(url, 
-                         headers, 
-                         req_num=DEFAULT_RETRY_COUNT, 
-                         payload_type="json", 
+        res = HttpClient(url,
+                         headers,
+                         req_num=DEFAULT_RETRY_COUNT,
+                         payload_type="json",
                          body=body).post()
         try:
             res = json.loads(res.text)
@@ -368,10 +374,10 @@ class Reporting():
                 "dataId": data_view_id
             }
         print("Pulling rows to be broken down....")
-        res = HttpClient(url, 
-                         headers, 
-                         req_num=DEFAULT_RETRY_COUNT, 
-                         payload_type="json", 
+        res = HttpClient(url,
+                         headers,
+                         req_num=DEFAULT_RETRY_COUNT,
+                         payload_type="json",
                          body=body).post()
         try:
             res = json.loads(res.text)
@@ -430,10 +436,10 @@ class Reporting():
         for _ in range(num_of_calls):
             breakdown_body['metricContainer']['metricFilters'][0]['itemId'] = res['rows'][i]['itemId']
             print("Breaking row " + str(i) + " down....")
-            breakdown_rows = HttpClient(url, 
-                                       headers, 
-                                       req_num=DEFAULT_RETRY_COUNT, 
-                                       payload_type="json", 
+            breakdown_rows = HttpClient(url,
+                                       headers,
+                                       req_num=DEFAULT_RETRY_COUNT,
+                                       payload_type="json",
                                        body=breakdown_body).post()
             try:
                 res = json.loads(res.text)
@@ -514,7 +520,17 @@ class Reporting():
     def get_top_ten_dimension_items(self, headers, data_view_id, start_date, end_date, dimension,
                                 search_type=str, contains_term=str):
         """Package function for getting the top ten dimension items for a time period"""
-        res = Reporting.get_top_ten_dimension_items_call(self, headers, data_view_id, start_date, end_date, dimension,
-                                search_type, contains_term)
-        df = Reporting.get_top_ten_dimension_items_clean(self, res, start_date, end_date, dimension)
+        res = Reporting.get_top_ten_dimension_items_call(self,
+                                                         headers,
+                                                         data_view_id,
+                                                         start_date,
+                                                         end_date,
+                                                         dimension,
+                                                         search_type,
+                                                         contains_term)
+        df = Reporting.get_top_ten_dimension_items_clean(self,
+                                                         res,
+                                                         start_date,
+                                                         end_date,
+                                                         dimension)
         return df

@@ -17,9 +17,8 @@ This module is used by the CJA Reporting API and provides significant value for 
 ## Dependencies
 * pandas
 * requests
-* json
-* time
 * numpy
+* plotly
 
 
 ## Common Input Parameters

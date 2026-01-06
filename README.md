@@ -1,4 +1,4 @@
-# py2AdobeReporting
+# py2adobe_reporting
 
 A Python wrapper for Adobe Customer Journey Analytics (CJA) Reporting API that enables analysts to easily extract and analyze data programmatically.
 
@@ -14,20 +14,20 @@ A Python wrapper for Adobe Customer Journey Analytics (CJA) Reporting API that e
 ## Installation
 
 ```bash
-pip install py2AdobeReporting
+pip install py2adobe_reporting
 ```
 
 Or install from source:
 
 ```bash
-git clone https://github.com/jaytmii/py2AdobeReportingPackage.git
-cd py2AdobeReportingPackage
+git clone https://github.com/jaytmii/py2adobe_reporting_package.git
+cd py2adobe_reporting_package
 pip install -e .
 ```
 
 ## Requirements
 
-- Python >= 3.8
+- Python >= 3.10
 - Adobe CJA API credentials (OAuth 2.0 Server-to-Server)
 
 ## Quick Start
@@ -38,31 +38,31 @@ Create a JSON configuration file with your Adobe credentials:
 
 ```json
 {
-  "clientSecret": "your-client-secret",
+  "client_secret": "your-client-secret",
   "defaultHeaders": {
     "x-api-key": "your-api-key",
     "x-gw-ims-org-id": "your-org-id"
   },
-  "companyId": "your-company-id",
+  "company_id": "your-company-id",
   "scopes": "api_scopes",
-  "imsHost": "ims",
-  "tokenUrl": "token_url"
+  "ims_host": "ims",
+  "token_url": "token_url"
 }
 ```
 
 ### 2. Authenticate
 
 ```python
-from py2AdobeReporting.auth import s2sAuth
+from py2adobe_reporting.auth import s2s_auth
 
 # Authenticate and get environment object
-env = s2sAuth("path/to/config.json")
+env = s2s_auth("path/to/config.json")
 ```
 
 ### 3. Generate Headers
 
 ```python
-from py2AdobeReporting.auth import cja_oauth_headers
+from py2Adobe_reporting.auth import cja_oauth_headers
 
 # Create headers for API calls
 headers = cja_oauth_headers("path/to/config.json", env.token)
@@ -71,7 +71,7 @@ headers = cja_oauth_headers("path/to/config.json", env.token)
 ### 4. Pull a Report
 
 ```python
-from py2AdobeReporting.cja_functions.reporting_management import Reporting
+from py2adobe_reporting.cja_functions.reporting_management import Reporting
 
 # Initialize reporting class
 reporting = Reporting()

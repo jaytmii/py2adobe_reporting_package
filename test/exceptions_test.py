@@ -1,7 +1,7 @@
 """A test file for all the exceptions"""
 from unittest.mock import patch, Mock
 import pytest
-from py2AdobeReporting.reporting_api import ReportingAPI
+from py2adobe_reporting.reporting_api import ReportingAPI
 
 def test_status_handling_200():
     """Test that 200 status returns OK message"""

@@ -11,13 +11,13 @@ class ReportingAPI:
     def base_url(cls):
         """The base url for the reporting API"""
         return cls.BASE_URL
-    
+
     @classmethod
     def get_top_items_endpoint(cls):
         """The endpoint for top items"""
         return cls.TOP_ITEMS_ENDPOINT
 
-    @classmethod    
+    @classmethod
     def build_url(cls, endpoint):
         """Builds the full URL for a given endpoint"""
         return f"{cls.BASE_URL}{endpoint}"
@@ -26,7 +26,7 @@ class ReportingAPI:
     def build_get_top_items_url(cls):
         """Builds the full URL for the top items endpoint"""
         return f"{cls.BASE_URL}{cls.TOP_ITEMS_ENDPOINT}"
-    
+
     class SuccessfullResponseCodes:
         """Class for handling successful response codes"""
         default_message = "Successful Response"
@@ -35,7 +35,7 @@ class ReportingAPI:
 
         def __str__(self):
             return self.message
-        
+
     class JsonConversionFailure(Exception):
         """When a call is succesful but json conversion fails for parsing"""
         default_message = "API Call returned succesfully, but JSON conversion failed."
@@ -53,7 +53,7 @@ class ReportingAPI:
         default_message = "CJA Reporting API error"
         def __init__(self, message=None):
             super().__init__(message or self.default_message)
-            
+
     class MalformedRequest(ClientError):
         """400 status code response"""
         default_message = "Malformed Request"
@@ -61,7 +61,7 @@ class ReportingAPI:
     class UnauthorizedRequest(ClientError):
         """401 status code response"""
         default_message = "Unauthorized Request"
-        
+
     class ForbiddenRequest(ClientError):
         """403 status code response"""
         default_message = "Forbidden Request"
@@ -69,7 +69,7 @@ class ReportingAPI:
     class ResourceNotFound(ClientError):
         """404 status code response"""
         default_message = "Resource Not Found"
-        
+
     class InternalServerError(ClientError):
         """500 status code response"""
         default_message = "Internal Server Error"
@@ -100,3 +100,4 @@ class ReportingAPI:
             else:
                 return "Unknown Status Code Response"
         raise error_exc()
+    

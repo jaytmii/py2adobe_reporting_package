@@ -6,10 +6,10 @@ import requests
 
 ## Integration format
 # {
-#     "clientSecret": "clientSecretVal",
-#     "companyId": "companyIdVal",
-#     "imsHost": "ims-na1.adobelogin.com",
-#     "tokenUrl": "/ims/token/v3",
+#     "client_secret": "clientSecretVal",
+#     "company_id": "companyIdVal",
+#     "ims_host": "ims-na1.adobelogin.com",
+#     "token_url": "/ims/token/v3",
 #     "defaultHeaders": {
 #         "Accept": "application/json",
 #         "x-api-key": "apiKey",
@@ -19,15 +19,14 @@ import requests
 # }
 class TokenURL():
     """To store your token URL components"""
-    def __init__(self, imsHost, tokenUrl):
-        self.imsHost = imsHost
-        self.tokenUrl = tokenUrl
+    def __init__(self, ims_host, token_url):
+        self.ims_host = ims_host
+        self.token_url = token_url
 
     def get_token_url(self):
         """function to get token url from config"""
-        url_full = f"https://{self.imsHost}{self.tokenUrl}"
+        url_full = f"https://{self.ims_host}{self.token_url}"
         return url_full
-        
 
 
 def json_load(your_config_file):
@@ -35,10 +34,10 @@ def json_load(your_config_file):
     try:
         with open(your_config_file, "r", encoding="utf-8") as file:
             config_json = json.load(file)
-    except FileNotFoundError:
-        raise FileNotFoundError("Config file not found.")
-    except json.JSONDecodeError:
-        raise Exception("Config file is invalid - ensure JSON formatting is correct.")
+    except FileNotFoundError as exc:
+        raise FileNotFoundError("Config file not found.") from exc
+    except json.JSONDecodeError as exc:
+        raise Exception("Config file is invalid - ensure JSON formatting is correct.") from exc
     return config_json
 
 def get_config_values(config_json):
@@ -79,15 +78,15 @@ def aep_oauth_headers(your_config_file, access_token, accept_header, sandbox):
     "Authorization" : "Bearer " + access_token}
     return aep_headers
 
-class aepEnv:
+class AEPEnv:
     """To store your authentication credentials"""
-    def __init__(self, apiKey, orgId, companyId, token):
-        self.apiKey = apiKey
-        self.orgId = orgId
-        self.companyId = companyId
+    def __init__(self, api_key, org_id, company_id, token):
+        self.api_key = api_key
+        self.org_id = org_id
+        self.company_id = company_id
         self.token = token
 
-def s2sAuth(
+def s2s_auth(
     filename
 ):
     """Primary S2S Auth function"""
@@ -96,18 +95,18 @@ def s2sAuth(
 
     print(f"Authenticating using file: {filename}")
 
-    tokenUrlFull = TokenURL(config_json.get("imsHost"), config_json.get("tokenUrl")).get_token_url()
+    token_url_full = TokenURL(config_json.get("ims_host"), config_json.get("token_url")).get_token_url()
     payload = {
-        'client_id': config_values['apiKey'],
-        'client_secret': config_values['clientSecret'],
+        'client_id': config_values['api_key'],
+        'client_secret': config_values['client_secret'],
         'grant_type': 'client_credentials',
         'scope': config_values['scopes']
     }
 
-    response = requests.post(tokenUrlFull, data=payload, timeout = 10)
+    response = requests.post(token_url_full, data=payload, timeout = 10)
     if response.status_code == 200:
         token = response.json()
         print(token['access_token'])
-        return aepEnv(config_values['apiKey'], config_values['orgId'], config_values['companyId'], token['access_token'])
+        return AEPEnv(config_values['api_key'], config_values['org_id'], config_values['company_id'], token['access_token'])
     else:
         raise requests.exceptions.RequestException(f"Failed to authenticate. Status code: {response.status_code}, Response: {response.text}")

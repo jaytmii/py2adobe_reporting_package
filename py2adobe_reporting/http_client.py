@@ -1,8 +1,7 @@
 """Module for API Call functionality improvements"""
-import json
 import time
 import requests
-from py2AdobeReporting.reporting_api import ReportingAPI 
+from py2adobe_reporting.reporting_api import ReportingAPI
 
 ## Use the following syntax for different calls ##
 # GET CALL: HttpClient(url,headers).get()
@@ -76,19 +75,19 @@ class HttpClient(ReportingAPI):
                 attempt_count+=1
         print(f"API call failed after {req_num} attempts.")
         return None
-    
+
     def get(self):
         """Class function for GET Calls incorporating retry script"""
         type_of_call = "GET"
         res = self.api_retry(type_of_call, self.req_num)
         return res
-    
+
     def post(self):
         """Class function for POST Calls incorporating retry script"""
         type_of_call = "POST"
         res = self.api_retry(type_of_call, self.req_num)
         return res
-    
+
     def put(self):
         """Class function for PUT Calls incorporating retry script"""
         type_of_call = "PUT"
@@ -100,9 +99,10 @@ class HttpClient(ReportingAPI):
         type_of_call = "PATCH"
         res = self.api_retry(type_of_call, self.req_num)
         return res
-    
+
     def delete(self):
         """Class function for DELETE Calls incorporating retry script"""
         type_of_call = "DELETE"
         res = self.api_retry(type_of_call, self.req_num)
         return res
+
