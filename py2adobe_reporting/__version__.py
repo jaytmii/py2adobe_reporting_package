@@ -1,2 +1,2 @@
 """For tracking versioning"""
-__version__ = "0.0.2.test"
+__version__ = "0.0.3"
