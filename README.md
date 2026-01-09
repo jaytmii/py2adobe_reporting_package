@@ -112,6 +112,17 @@ For detailed function parameters and examples, see:
 
 ## Example Use Cases
 
+### Get Daily Visits
+```python
+df = reporting.daily_time_series_report(
+    headers=headers,
+    data_view_id="your-data-view-id",
+    start_date="2024-01-01",
+    end_date="2024-01-31",
+    metric="metrics/visits"
+)
+```
+
 ### Get Monthly Visits
 
 ```python
@@ -166,6 +177,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 James Mitchell - jaytmii@gmail.com
 
-## Acknowledgments
-
-Built for Adobe Customer Journey Analytics API v2.0
